@@ -46,7 +46,7 @@ const DATA = {
       "Valle Hermoso": 7000,
       "Surco Centro": 6800,
       "Surco Viejo": 5750,
-      "Limite SJM": 5900
+      "Limite SJM": 5200
     }
   },
   "La Molina": {
@@ -904,6 +904,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
 
 
 
