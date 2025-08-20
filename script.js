@@ -594,7 +594,6 @@ const DATA = {
     }
   }
 };
-
 // Funciones utilitarias para análisis de mercado
 function getMarketStats() {
   const stats = {
@@ -606,39 +605,39 @@ function getMarketStats() {
     mostAffordable: [],
     lastUpdate: "Agosto 2024"
   };
-  
+
   const allPrices = [];
-  
+
   Object.entries(DATA).forEach(([district, data]) => {
     const zones = Object.keys(data.zones);
     const prices = Object.values(data.zones);
-    
+
     stats.totalZones += zones.length;
-    
+
     // Actualizar rango de precios
     prices.forEach(price => {
       stats.priceRange.min = Math.min(stats.priceRange.min, price);
       stats.priceRange.max = Math.max(stats.priceRange.max, price);
       allPrices.push({ district, price });
     });
-    
+
     // Calcular precio promedio por distrito
     const avgPrice = Math.round(prices.reduce((sum, price) => sum + price, 0) / prices.length);
     stats.avgPriceByDistrict[district] = avgPrice;
   });
-  
+
   // Top 10 más caros y más baratos
   allPrices.sort((a, b) => b.price - a.price);
   stats.topExpensive = allPrices.slice(0, 10);
   stats.mostAffordable = allPrices.slice(-10).reverse();
-  
+
   return stats;
 }
 
 // Buscar zonas por rango de precio
 function findByPriceRange(minPrice, maxPrice) {
   const results = [];
-  
+
   Object.entries(DATA).forEach(([district, data]) => {
     Object.entries(data.zones).forEach(([zone, price]) => {
       if (price >= minPrice && price <= maxPrice) {
@@ -651,7 +650,7 @@ function findByPriceRange(minPrice, maxPrice) {
       }
     });
   });
-  
+
   return results.sort((a, b) => a.price - b.price);
 }
 
@@ -663,49 +662,48 @@ function getDistrictsByCategory() {
     "Lima Este": ["Ate", "San Juan de Lurigancho", "El Agustino", "Santa Anita", "Lurigancho-Chosica"],
     "Lima Norte": ["Los Olivos", "San Martin de Porres", "Comas", "Independencia", "Puente Piedra", "Carabayllo"],
     "Lima Sur": ["Chorrillos", "San Juan de Miraflores", "Villa El Salvador", "Villa Maria del Triunfo", "Lurin", "Pachacamac"],
-    "Callao": ["Callao", "Bellavista", "La Perla", "La Punta", "Ventanilla", "Mi peru"]
-    };
-  }
-  // Función para validación con reglas específicas del mercado peruano
+    "Callao": ["Callao", "Bellavista", "La Perla", "La Punta", "Ventanilla", "Mi Peru"]
+  } // <-- **Sin punto y coma aquí**
+}
+
+// Función para validación con reglas específicas del mercado peruano
 function validateRealEstateData() {
   const errors = [];
   const warnings = [];
-  
+
   Object.entries(DATA).forEach(([district, data]) => {
     // Verificar estructura básica
     if (!data.zones || Object.keys(data.zones).length === 0) {
       errors.push(`${district}: No tiene zonas definidas`);
     }
-    
+
     // Validar precios realistas para el mercado peruano (2024-2025)
     if (data.zones) {
       Object.entries(data.zones).forEach(([zone, price]) => {
         if (price < 2000 || price > 15000) {
           warnings.push(`${district}.${zone}: Precio ${price} fuera del rango típico del mercado (S/2,000 - S/15,000)`);
         }
-        
+
         if (typeof price !== 'number') {
           errors.push(`${district}.${zone}: Precio debe ser numérico`);
         }
       });
     }
   });
-  
+
   return { errors, warnings };
 }
 
 // Exportar para uso
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { 
-    DATA, 
-    getMarketStats, 
-    findByPriceRange, 
-    getDistrictsByCategory, 
-    validateRealEstateData 
-    }
-  }
-};
-
+  module.exports = {
+    DATA,
+    getMarketStats,
+    findByPriceRange,
+    getDistrictsByCategory,
+    validateRealEstateData
+  };
+}
 // ===============================
 // Configuración de Factores (Actualizada)
 // ===============================
@@ -1027,4 +1025,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
 
