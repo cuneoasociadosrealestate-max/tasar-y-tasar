@@ -630,8 +630,8 @@ const FACTORES_TASACION = {
     }
   },
   areaLibre: {
-    departamento: 0.25,
-    casa: 0.40,
+    departamento: 0.40,
+    casa: 0.50,
     terreno: 0.90
   },
   tipoInmueble: {
@@ -904,6 +904,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
 
 
 
