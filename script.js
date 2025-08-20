@@ -1,6 +1,4 @@
-// ===============================
 // Base de datos de precios por m² en Lima (Agosto 2024)
-// ===============================
 const DATA = {
   // === LIMA TOP (Distritos Premium) ===
   "San Isidro": {
@@ -594,124 +592,13 @@ const DATA = {
     }
   }
 };
-// Funciones utilitarias para análisis de mercado
-function getMarketStats() {
-  const stats = {
-    totalDistricts: Object.keys(DATA).length,
-    totalZones: 0,
-    priceRange: { min: Infinity, max: -Infinity },
-    avgPriceByDistrict: {},
-    topExpensive: [],
-    mostAffordable: [],
-    lastUpdate: "Agosto 2024"
-  };
 
-  const allPrices = [];
-
-  Object.entries(DATA).forEach(([district, data]) => {
-    const zones = Object.keys(data.zones);
-    const prices = Object.values(data.zones);
-
-    stats.totalZones += zones.length;
-
-    // Actualizar rango de precios
-    prices.forEach(price => {
-      stats.priceRange.min = Math.min(stats.priceRange.min, price);
-      stats.priceRange.max = Math.max(stats.priceRange.max, price);
-      allPrices.push({ district, price });
-    });
-
-    // Calcular precio promedio por distrito
-    const avgPrice = Math.round(prices.reduce((sum, price) => sum + price, 0) / prices.length);
-    stats.avgPriceByDistrict[district] = avgPrice;
-  });
-
-  // Top 10 más caros y más baratos
-  allPrices.sort((a, b) => b.price - a.price);
-  stats.topExpensive = allPrices.slice(0, 10);
-  stats.mostAffordable = allPrices.slice(-10).reverse();
-
-  return stats;
-}
-
-// Buscar zonas por rango de precio
-function findByPriceRange(minPrice, maxPrice) {
-  const results = [];
-
-  Object.entries(DATA).forEach(([district, data]) => {
-    Object.entries(data.zones).forEach(([zone, price]) => {
-      if (price >= minPrice && price <= maxPrice) {
-        results.push({
-          district,
-          zone,
-          price,
-          priceFormatted: `S/ ${price.toLocaleString('es-PE')}`
-        });
-      }
-    });
-  });
-
-  return results.sort((a, b) => a.price - b.price);
-}
-
-// Obtener distritos por categoría
-function getDistrictsByCategory() {
-  return {
-    "Lima Top (Premium)": ["San Isidro", "Miraflores", "Barranco", "Santiago de Surco", "La Molina"],
-    "Lima Moderna": ["Jesus Maria", "Lince", "Magdalena del Mar", "San Miguel", "Pueblo Libre", "Surquillo", "San Borja"],
-    "Lima Este": ["Ate", "San Juan de Lurigancho", "El Agustino", "Santa Anita", "Lurigancho-Chosica"],
-    "Lima Norte": ["Los Olivos", "San Martin de Porres", "Comas", "Independencia", "Puente Piedra", "Carabayllo"],
-    "Lima Sur": ["Chorrillos", "San Juan de Miraflores", "Villa El Salvador", "Villa Maria del Triunfo", "Lurin", "Pachacamac"],
-    "Callao": ["Callao", "Bellavista", "La Perla", "La Punta", "Ventanilla", "Mi Peru"]
-  } // <-- **Sin punto y coma aquí**
-}
-
-// Función para validación con reglas específicas del mercado peruano
-function validateRealEstateData() {
-  const errors = [];
-  const warnings = [];
-
-  Object.entries(DATA).forEach(([district, data]) => {
-    // Verificar estructura básica
-    if (!data.zones || Object.keys(data.zones).length === 0) {
-      errors.push(`${district}: No tiene zonas definidas`);
-    }
-
-    // Validar precios realistas para el mercado peruano (2024-2025)
-    if (data.zones) {
-      Object.entries(data.zones).forEach(([zone, price]) => {
-        if (price < 2000 || price > 15000) {
-          warnings.push(`${district}.${zone}: Precio ${price} fuera del rango típico del mercado (S/2,000 - S/15,000)`);
-        }
-
-        if (typeof price !== 'number') {
-          errors.push(`${district}.${zone}: Precio debe ser numérico`);
-        }
-      });
-    }
-  });
-
-  return { errors, warnings };
-}
-
-// Exportar para uso
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    DATA,
-    getMarketStats,
-    findByPriceRange,
-    getDistrictsByCategory,
-    validateRealEstateData
-  };
-}
-// ===============================
-// Configuración de Factores (Actualizada)
-// ===============================
+// Configuración de Factores
 const FACTORES_TASACION = {
   antiguedad: {
-    depreciacionAnual: 0.01,   // 1% anual
-    depreciacionMaxima: 0.30,  // Máx. 30%
-    premiumNuevo: 0.05         // +5% si tiene ≤ 2 años
+    depreciacionAnual: 0.01,
+    depreciacionMaxima: 0.30,
+    premiumNuevo: 0.05
   },
   dormitorios: {
     base: 2,
@@ -764,26 +651,22 @@ const FACTORES_TASACION = {
   }
 };
 
-// ===============================
-// Función: Obtener tipo de cambio
-// ===============================
+// Función para obtener tipo de cambio
 async function obtenerTipoCambio() {
   try {
     const res = await fetch("https://open.er-api.com/v6/latest/PEN");
     const data = await res.json();
     if (data && data.rates && data.rates.USD) {
-      return 1 / data.rates.USD; // PEN a USD
+      return 1 / data.rates.USD;
     }
     throw new Error("No se pudo obtener tipo de cambio");
   } catch (err) {
     console.error("Error al obtener tipo de cambio:", err);
-    return 3.75; // Valor por defecto
+    return 3.75;
   }
 }
 
-// ===============================
-// Función: Calcular rango dinámico
-// ===============================
+// Función para calcular rango dinámico
 function calcularRangoDinamico(datos) {
   let rango = 0.10;
   rango += Math.min((datos.antig / 5) * 0.005, 0.05);
@@ -809,9 +692,7 @@ function calcularRangoDinamico(datos) {
   return Math.min(Math.max(rango, 0.08), 0.20);
 }
 
-// ===============================
 // Funciones de factores
-// ===============================
 function aplicarFactorAntiguedad(valor, antiguedad) {
   if (antiguedad <= 1) {
     return valor * (1 + FACTORES_TASACION.antiguedad.premiumNuevo);
@@ -849,14 +730,14 @@ function aplicarFactorBanos(valor, banos) {
 
 function aplicarFactorPiso(valor, piso, tieneAscensor) {
   let factorPiso = 1.0;
-  if (piso >= FACTORES_TASACION.piso.pisosBajos.min && piso <= FACTORES_TASACION.piso.pisosBajos.max) {
-    factorPiso = FACTORES_TASACION.piso.pisosBajos.factor;
-  } else if (piso >= FACTORES_TASACION.piso.pisosIdeales.min && piso <= FACTORES_TASACION.piso.pisosIdeales.max) {
-    factorPiso = FACTORES_TASACION.piso.pisosIdeales.factor;
-  } else if (piso >= FACTORES_TASACION.piso.pisosAltos.min && piso <= FACTORES_TASACION.piso.pisosAltos.max) {
-    factorPiso = FACTORES_TASACION.piso.pisosAltos.factor;
-  } else if (piso >= FACTORES_TASACION.piso.pisosExtremosAltos.min) {
-    factorPiso = FACTORES_TASACION.piso.pisosExtremosAltos.factor;
+  if (piso >= 1 && piso <= 2) {
+    factorPiso = 0.92;
+  } else if (piso >= 3 && piso <= 8) {
+    factorPiso = 1.0;
+  } else if (piso >= 9 && piso <= 15) {
+    factorPiso = 0.96;
+  } else if (piso >= 16) {
+    factorPiso = 0.88;
   }
 
   let factorAscensor = 1.0;
@@ -880,9 +761,7 @@ function aplicarFactorEficienciaEnergetica(valor, calificacion) {
   return valor * factor;
 }
 
-// ===============================
 // Ejecución principal
-// ===============================
 document.addEventListener("DOMContentLoaded", () => {
   const distritoSel = document.getElementById("distrito");
   const zonaSel = document.getElementById("zona");
@@ -1025,5 +904,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
 
 
