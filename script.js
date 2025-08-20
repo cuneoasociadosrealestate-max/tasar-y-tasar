@@ -45,7 +45,7 @@ const DATA = {
       "Las Gardenias": 7200,
       "Valle Hermoso": 7000,
       "Surco Centro": 6800,
-      "Surco Viejo": 6400,
+      "Surco Viejo": 5750,
       "Limite SJM": 5900
     }
   },
@@ -904,6 +904,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
 
 
 
